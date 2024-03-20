@@ -12,7 +12,7 @@
 <div id="download-response" hidden></div>
 
 <script>
-    document.addEventListener('htmx:afterSwap', function(evt) {
+    document.addEventListener('htmx:afterSwap', function (evt) {
         if (evt.detail.target.id === "download-response") {
             const response = evt.detail.target.innerHTML;
             const blob = new Blob([response], { type: 'application/octet-stream' });
@@ -28,5 +28,35 @@
     });
 </script>
 
-{% endblock %}
+<form id="another-form">
+    <label for="name">Name</label>
+    <input id="name" name="name">
+    <input type="submit">
+</form>
 
+<script>
+    document.getElementById('another-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+        fetch('/download-file', {
+            method: 'POST',
+            body: new FormData(document.getElementById('another-form'))
+        })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'downloaded_file.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+</script>
+
+
+{% endblock %}
