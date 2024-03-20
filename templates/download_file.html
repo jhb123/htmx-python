@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Download File{% endblock %}
+
+{% block content %}
+<h1>Download file</h1>
+<form id="special-form" hx-post="/download-file" hx-target="#download-response">
+    <label for="name">Name</label>
+    <input id="name" name="name">
+    <input type="submit">
+</form>
+<div id="download-response" hidden></div>
+
+<script>
+    document.addEventListener('htmx:afterSwap', function(evt) {
+        if (evt.detail.target.id === "download-response") {
+            const response = evt.detail.target.innerHTML;
+            const blob = new Blob([response], { type: 'application/octet-stream' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "data.yaml";
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+    });
+</script>
+
+{% endblock %}
+
